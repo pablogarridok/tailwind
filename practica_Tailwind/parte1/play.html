@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Activa Tailwind en el navegador (solo dev) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Define tokens (solo variables o @keyframes dentro de @theme) -->
+    <style type="text/tailwindcss">
+      @layer theme {
+        @theme {
+          --color-brand: #6366f1;
+        }
+      }
+
+      @layer components{
+        .btn {
+            @apply px-6 py-2 rounded-lg font-medium transition;
+        }
+        .btn-brand{
+            @apply bg-brand text-white hover:bg-brand/80;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-800">
+    <h1 class="text-3xl font-bold underline text-brand">Hola mundo</h1>
+    <p class="mt-4 text-gray-600">Probando Tailwind con Play CDN</p>
+  </body>
+</html>
