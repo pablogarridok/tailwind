@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parte 4 - Tailwind Tokens y Componentes</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+<style type="text/tailwindcss">
+@layer theme {
+  @theme {
+    --color-brand: #2563eb;
+    --radius-card: 0.75rem;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.1);
+  }
+}
+
+@layer components {
+  .badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold
+           rounded-full bg-brand/10 text-brand;
+  }
+
+  .panel {
+    @apply bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-800
+           shadow rounded-[--radius-card] p-4;
+  }
+}
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-gray-950 p-8 flex flex-col gap-6">
+
+<h1 class="text-3xl font-bold text-brand">Mini biblioteca v4.1</h1>
+
+<div class="flex gap-3">
+  <span class="badge">Token personalizado</span>
+  <span class="badge">Accesible</span>
+</div>
+
+<div class="panel">
+  <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">
+    Panel con tokens y componentes
+  </h2>
+  <p class="text-gray-600 dark:text-gray-300">
+    Este bloque usa <strong>@theme</strong> (color, radio y sombra) y componentes creados con <strong>@apply</strong>.
+  </p>
+</div>
+
+</body>
+</html>

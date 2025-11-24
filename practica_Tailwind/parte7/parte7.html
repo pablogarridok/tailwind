@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parte 7 — Modo Oscuro</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-950 min-h-screen p-8 flex flex-col gap-6">
+
+<h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Selector de tema accesible</h1>
+
+<!-- Fieldset de opciones -->
+<fieldset class="flex gap-4">
+  <legend class="sr-only">Elegir tema</legend>
+
+  <label class="flex items-center gap-2 cursor-pointer">
+    <input type="radio" name="theme" value="light" class="peer" />
+    Claro
+  </label>
+  <label class="flex items-center gap-2 cursor-pointer">
+    <input type="radio" name="theme" value="dark" class="peer" />
+    Oscuro
+  </label>
+  <label class="flex items-center gap-2 cursor-pointer">
+    <input type="radio" name="theme" value="system" class="peer" />
+    Sistema
+  </label>
+</fieldset>
+
+<!-- Preview forzado localmente -->
+<div class="flex flex-col gap-4 mt-6">
+  <label class="flex items-center gap-2">
+    <input type="checkbox" class="peer sr-only" />
+    <span>Simular tema oscuro en este bloque</span>
+  </label>
+
+  <div class="peer-checked:bg-gray-900 peer-checked:text-white bg-white text-gray-900 rounded-xl p-6 shadow transition">
+    <h2 class="text-xl font-bold">Preview</h2>
+    <p>Este bloque cambia a oscuro usando solo utilidades Tailwind con peer.</p>
+    <button class="px-4 py-2 rounded-md bg-blue-600 text-white font-medium border border-transparent hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-400 mt-2">Acción primaria</button>
+    <button class="px-4 py-2 rounded-md bg-white text-gray-800 border border-gray-300 hover:bg-gray-100 dark:bg-slate-700 dark:text-gray-100 dark:border-gray-600 dark:hover:bg-slate-600 transition focus:outline-none focus:ring-2 focus:ring-blue-400 mt-2">Acción secundaria</button>
+  </div>
+</div>
+
+<script>
+  const radios = document.querySelectorAll('input[name="theme"]');
+
+  function setTheme(value) {
+    const html = document.documentElement;
+    localStorage.setItem('theme', value);
+
+    if(value === 'light') {
+      html.classList.remove('dark');
+      window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', syncSystem);
+    } else if(value === 'dark') {
+      html.classList.add('dark');
+      window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', syncSystem);
+    } else {
+      // Sistema
+      syncSystem();
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncSystem);
+    }
+  }
+
+  function syncSystem() {
+    const html = document.documentElement;
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    html.classList.toggle('dark', isDark);
+  }
+
+  const saved = localStorage.getItem('theme') || 'system';
+  radios.forEach(r => {
+    r.checked = r.value === saved;
+    r.addEventListener('change', () => setTheme(r.value));
+  });
+
+  setTheme(saved);
+</script>
+
+</body>
+</html>
