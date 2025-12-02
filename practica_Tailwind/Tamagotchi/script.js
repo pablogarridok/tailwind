@@ -4,12 +4,10 @@
 
     function actualizarBarras() {
 
-      // BARRAS
       document.getElementById("barraintelecto").style.width = intelecto + "%";
       document.getElementById("barraoratoria").style.width = oratoria + "%";
       document.getElementById("barraEnergia").style.width = energia + "%";
 
-      // CAMBIAR IMAGEN SEGÚN ESTADO
       const promedio = (intelecto + oratoria + energia) / 3;
       const img = document.getElementById("personaje");
 
