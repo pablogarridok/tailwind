@@ -10,7 +10,6 @@
   tailwind.config = { darkMode: 'class' }
 </script>
 
-<!-- Script inline para aplicar tema ANTES de renderizar -->
 <script>
 (function() {
   const saved = localStorage.getItem('theme') || 'system';
@@ -37,7 +36,6 @@
   
   <h1 class="text-3xl font-bold text-center mb-8">Parte 7 — Modo Oscuro</h1>
 
-  <!-- Selector de Tema -->
   <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 shadow-lg">
     <fieldset>
       <legend class="text-xl font-semibold mb-4">Preferencia de tema</legend>
@@ -65,7 +63,6 @@
     </fieldset>
   </div>
 
-  <!-- Preview Local con peer (sin JS) -->
   <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 shadow-lg">
     <h2 class="text-xl font-semibold mb-4">Preview Local (solo CSS)</h2>
     
@@ -75,7 +72,6 @@
       <span class="text-sm text-gray-500">Activa para forzar oscuro en este bloque usando solo utilidades <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">peer-checked:</code>.</span>
     </label>
     
-    <!-- Contenedor que reacciona al checkbox peer -->
     <div class="peer-checked:bg-gray-900 peer-checked:text-white bg-white text-gray-900 rounded-lg p-6 shadow-xl transition-colors duration-300">
       <h3 class="text-lg font-bold mb-2">Preview</h3>
       <p class="text-2xl font-semibold mb-4">Tarjeta adaptable al tema</p>
@@ -97,79 +93,98 @@
 </div>
 
 <script>
-// Función para aplicar el tema
-function setTheme(value) {
-  const html = document.documentElement;
-  
-  // Guardar en localStorage
-  localStorage.setItem('theme', value);
-  
-  if (value === 'light') {
-    html.classList.remove('dark');
-    removeSystemListener();
-  } else if (value === 'dark') {
-    html.classList.add('dark');
-    removeSystemListener();
-  } else {
-    // Sistema
-    applySystemTheme();
-    addSystemListener();
-  }
-}
-
-// Aplicar tema según preferencia del sistema
-function applySystemTheme() {
-  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.classList.toggle('dark', isDark);
-}
-
-// Listener para cambios en preferencia del sistema
-let systemListener = null;
-
-function addSystemListener() {
-  if (systemListener) return; // Ya existe
-  
-  systemListener = (e) => {
-    if (localStorage.getItem('theme') === 'system') {
-      document.documentElement.classList.toggle('dark', e.matches);
-    }
-  };
-  
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', systemListener);
-}
-
-function removeSystemListener() {
-  if (systemListener) {
-    window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', systemListener);
-    systemListener = null;
-  }
-}
-
-// Sincronizar radios con tema guardado
-function syncRadios() {
-  const saved = localStorage.getItem('theme') || 'system';
-  const radio = document.getElementById(`theme-${saved}`);
-  if (radio) radio.checked = true;
-}
-
-// Event listeners para los radios
-document.addEventListener('DOMContentLoaded', () => {
-  syncRadios();
-  
-  // Aplicar tema guardado (por si acaso)
-  const saved = localStorage.getItem('theme') || 'system';
-  setTheme(saved);
-  
-  // Listeners para los radio buttons
-  document.querySelectorAll('input[name="theme"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      if (e.target.checked) {
-        setTheme(e.target.value);
+    // Lógica del toggle de tema con persistencia y escucha del sistema
+    (function () {
+      const STORAGE_KEY = 'theme';
+      const root = document.documentElement;
+      let mql = null; // MediaQueryList para prefers-color-scheme
+      // Aplica el tema según preferencia del sistema
+      function applySystemTheme() {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          root.classList.add('dark');
+        } else {
+          root.classList.remove('dark');
+        }
       }
+      // Escucha cambios del sistema
+      function onSystemChange(e) {
+        // Solo aplicamos cambios automáticos si el user ha elegido "system"
+        const saved = localStorage.getItem(STORAGE_KEY) || 'system';
+        if (saved === 'system') {
+          if (e.matches) {
+            root.classList.add('dark');
+          } else {
+            root.classList.remove('dark');
+          }
+        }
+      }
+      // Establece el tema según el valor dado
+      function setTheme(value) {
+        // Guardar preferencia
+        localStorage.setItem(STORAGE_KEY, value);
+
+        // Limpiar listener previo
+        if (mql) {
+          mql.removeEventListener('change', onSystemChange);
+          mql = null;
+        }
+
+        // Aplicar
+        if (value === 'light') {
+          root.classList.remove('dark');
+        } else if (value === 'dark') {
+          root.classList.add('dark');
+        } else {
+          // system
+          applySystemTheme();
+          mql = window.matchMedia('(prefers-color-scheme: dark)');
+          mql.addEventListener('change', onSystemChange);
+        }
+      }
+      // Inicializa el estado desde localStorage y sincroniza los radios
+      function initThemeFromStorage() {
+        const saved = localStorage.getItem(STORAGE_KEY) || 'system';
+        setTheme(saved);
+
+        // Sincronizar radios
+        const radio = document.querySelector(`input[name="theme"][value="${saved}"]`);
+        if (radio) radio.checked = true;
+      }
+
+      // Vincular eventos a los radios
+      document.querySelectorAll('input[name="theme"]').forEach((radio) => {
+        radio.addEventListener('change', (e) => {
+          const value = e.target.value;
+          setTheme(value);
+        });
+      });
+
+      // Inicializar
+      initThemeFromStorage();
+    })();
+
+    // Aplica el tema según la preferencia guardada o del sistema
+    function applyThemeClass() {
+      const saved = localStorage.getItem('theme'); // 'dark' | 'light' | null (sistema)
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved === 'dark' || (!saved && prefersDark);
+      document.documentElement.classList.toggle('dark', isDark);
+    }
+
+    function setTheme(mode) {
+      if (mode === 'system') {
+        localStorage.removeItem('theme');
+      } else {
+        localStorage.setItem('theme', mode);
+      }
+      applyThemeClass();
+    }
+
+    // Si cambia la preferencia del sistema y no hay tema guardado, actualiza automáticamente
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if (!localStorage.getItem('theme')) applyThemeClass();
     });
-  });
-});
-</script>
+  </script>
 
 </body>
 </html>
